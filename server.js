@@ -13,7 +13,19 @@ const app = express();
 connectDB();
 
 
-app.use(cors());
+// In server.js
+const corsOptions = {
+  development: {
+    origin: ['http://localhost:3000', 'http://127.0.0.1:5500', 'http://localhost:5000'],
+    credentials: true
+  },
+  production: {
+    origin: ['https://your-frontend-app.vercel.app'], // Your Vercel frontend URL
+    credentials: true
+  }
+};
+
+app.use(cors(process.env.NODE_ENV === 'production' ? corsOptions.production : corsOptions.development));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
