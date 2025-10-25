@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog Platform</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .post {
+            background: white;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .post h2 {
+            margin-top: 0;
+            color: #333;
+        }
+        .post-meta {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+        }
+        .tags {
+            margin: 10px 0;
+        }
+        .tag {
+            display: inline-block;
+            background: #e0e0e0;
+            padding: 2px 8px;
+            margin: 2px;
+            border-radius: 4px;
+            font-size: 0.8em;
+        }
+        .loading {
+            text-align: center;
+            padding: 20px;
+        }
+        .error {
+            color: red;
+            text-align: center;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Blog Platform</h1>
+    <div id="posts-container">
+        <div class="loading">Loading posts...</div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:5000/api';
+
+        async function fetchPosts() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/posts`);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch posts');
+                }
+                const data = await response.json();
+                displayPosts(data.posts);
+            } catch (error) {
+                console.error('Error fetching posts:', error);
+                document.getElementById('posts-container').innerHTML =
+                    '<div class="error">Failed to load posts. Please try again later.</div>';
+            }
+        }
+
+        function displayPosts(posts) {
+            const container = document.getElementById('posts-container');
+
+            if (posts.length === 0) {
+                container.innerHTML = '<p>No posts available.</p>';
+                return;
+            }
+
+            const postsHtml = posts.map(post => `
+                <div class="post">
+                    <h2>${post.title}</h2>
+                    <div class="post-meta">
+                        By ${post.author.username} on ${new Date(post.createdAt).toLocaleDateString()}
+                    </div>
+                    ${post.tags && post.tags.length > 0 ? `
+                        <div class="tags">
+                            ${post.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+                        </div>
+                    ` : ''}
+                    <div class="content">
+                        ${post.content.length > 300 ? post.content.substring(0, 300) + '...' : post.content}
+                    </div>
+                </div>
+            `).join('');
+
+            container.innerHTML = postsHtml;
+        }
+
+       
+        fetchPosts();
+    </script>
+</body>
+</html>
